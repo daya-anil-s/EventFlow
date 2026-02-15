@@ -13,6 +13,7 @@ const registerSchema = z.object({
     name: z.string().min(2).max(50),
     email: z.string().email(),
     password: z.string().min(8).max(100),
+    role: z.enum(["admin", "participant", "mentor", "judge"]).optional(),
 });
 
 export async function POST(request) {
@@ -31,7 +32,7 @@ export async function POST(request) {
             return NextResponse.json({ error: "Invalid input", details: validation.error.format() }, { status: 400 });
         }
 
-        const { name, email, password } = validation.data;
+        const { name, email, password, role } = validation.data;
 
         await dbConnect();
 
@@ -49,10 +50,11 @@ export async function POST(request) {
             name,
             email,
             password: hashedPassword,
+            role: role || "participant",
         });
 
         return NextResponse.json(
-            { message: "User registered successfully", user: { email: user.email, name: user.name } },
+            { message: "User registered successfully", user: { email: user.email, name: user.name, role: user.role } },
             { status: 201 }
         );
     } catch (error) {

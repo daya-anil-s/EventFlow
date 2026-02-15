@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from './register.module.css';
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [role, setRole] = useState("participant");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function RegisterPage() {
             const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ name, email, password, role }),
             });
 
             const data = await res.json();
@@ -40,81 +40,168 @@ export default function RegisterPage() {
         }
     };
 
+    const containerStyle = {
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+        backgroundImage: "url('/auth-bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+    };
+
+    const boxStyle = {
+        width: "100%",
+        maxWidth: "420px",
+        padding: "32px",
+        borderRadius: "18px",
+        background: "rgba(255, 255, 255, 0.10)",
+        border: "1px solid rgba(255, 255, 255, 0.25)",
+        backdropFilter: "blur(22px) saturate(160%)",
+        WebkitBackdropFilter: "blur(22px) saturate(160%)",
+        boxShadow: "0 8px 30px rgba(0, 0, 0, 0.25)",
+        color: "white",
+    };
+
+    const inputStyle = {
+        width: "100%",
+        padding: "12px 16px",
+        borderRadius: "12px",
+        background: "rgba(255, 255, 255, 0.08)",
+        border: "1px solid rgba(255, 255, 255, 0.25)",
+        color: "white",
+        fontSize: "14px",
+        outline: "none",
+        marginTop: "8px",
+    };
+
+    const buttonStyle = {
+        width: "100%",
+        padding: "14px",
+        borderRadius: "14px",
+        background: "#2563eb",
+        color: "white",
+        fontWeight: "600",
+        fontSize: "16px",
+        border: "none",
+        cursor: "pointer",
+        marginTop: "24px",
+        boxShadow: "0 10px 20px rgba(37, 99, 235, 0.25)",
+    };
+
+    const labelStyle = {
+        fontSize: "12px",
+        fontWeight: "500",
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
+        opacity: 0.9,
+    };
+
     return (
-        <div className={styles.authPage}>
-            <div className={styles.authBox}>
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Create an Account</h2>
-                    <p className="mt-2 text-sm text-slate-300">Join EventFlow today</p>
+        <div style={containerStyle}>
+            <div style={boxStyle}>
+                <div style={{ textAlign: "center" }}>
+                    <h2 style={{ fontSize: "28px", fontWeight: "700" }}>Create an Account</h2>
+                    <p style={{ marginTop: "8px", opacity: 0.7, fontSize: "14px" }}>Join EventFlow today</p>
                 </div>
 
-                <form className={styles.authForm} onSubmit={handleSubmit}>
-                    <div className="space-y-3">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 uppercase">Full Name</label>
-                            <input
-                                type="text"
-                                required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                disabled={loading}
-                                className="mt-1 block w-full rounded-lg border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
-                                placeholder="John Doe"
-                            />
-                        </div>
+                <form onSubmit={handleSubmit} style={{ marginTop: "24px" }}>
+                    <div style={{ marginBottom: "16px" }}>
+                        <label style={labelStyle}>Full Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            disabled={loading}
+                            style={inputStyle}
+                            placeholder="John Doe"
+                        />
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 uppercase">Email</label>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={loading}
-                                className="mt-1 block w-full rounded-lg border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
-                                placeholder="you@example.com"
-                            />
-                        </div>
+                    <div style={{ marginBottom: "16px" }}>
+                        <label style={labelStyle}>Email</label>
+                        <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={loading}
+                            style={inputStyle}
+                            placeholder="you@example.com"
+                        />
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 uppercase">Password</label>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                disabled={loading}
-                                className="mt-1 block w-full rounded-lg border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
-                                placeholder="••••••••"
-                            />
-                        </div>
+                    <div style={{ marginBottom: "16px" }}>
+                        <label style={labelStyle}>Password</label>
+                        <input
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={loading}
+                            style={inputStyle}
+                            placeholder="••••••••"
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: "16px" }}>
+                        <label style={labelStyle}>I am a</label>
+                        <select
+                            value={role}
+                            onChange={(e) => setRole(e.target.value)}
+                            disabled={loading}
+                            style={inputStyle}
+                        >
+                            <option value="participant" style={{ color: "#1f2937" }}>Participant</option>
+                            <option value="mentor" style={{ color: "#1f2937" }}>Mentor</option>
+                            <option value="judge" style={{ color: "#1f2937" }}>Judge</option>
+                            <option value="admin" style={{ color: "#1f2937" }}>Admin</option>
+                        </select>
                     </div>
 
                     {error && (
-                        <div className="text-red-400 text-sm text-center bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                        <div style={{ 
+                            marginTop: "16px", 
+                            padding: "12px", 
+                            borderRadius: "8px",
+                            background: "rgba(239, 68, 68, 0.2)", 
+                            border: "1px solid rgba(239, 68, 68, 0.3)",
+                            color: "#fca5a5",
+                            fontSize: "13px",
+                            textAlign: "center"
+                        }}>
                             {error}
                         </div>
                     )}
 
                     {success && (
-                        <div className="text-blue-400 text-sm text-center bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
+                        <div style={{ 
+                            marginTop: "16px", 
+                            padding: "12px", 
+                            borderRadius: "8px",
+                            background: "rgba(34, 197, 94, 0.2)", 
+                            border: "1px solid rgba(34, 197, 94, 0.3)",
+                            color: "#86efac",
+                            fontSize: "13px",
+                            textAlign: "center"
+                        }}>
                             {success}
                         </div>
                     )}
 
-                    <div className="mt-4">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={styles.authButton}
-                        >
-                            {loading ? "Signing up..." : "Sign Up"}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{...buttonStyle, opacity: loading ? 0.6 : 1}}
+                    >
+                        {loading ? "Signing up..." : "Sign Up"}
+                    </button>
 
-                    <div className="mt-4 text-center text-sm text-slate-300">
-                        Already have an account?{" "}
-                        <a href="/login" className={styles.authLink}>
+                    <div style={{ marginTop: "16px", textAlign: "center", fontSize: "14px" }}>
+                        Already have an account?{' '}
+                        <a href="/login" style={{ color: "#60a5fa", fontWeight: "600" }}>
                             Sign In
                         </a>
                     </div>
