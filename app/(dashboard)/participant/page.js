@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from "react";
+import Link from "next/link";
 import { 
   Users, 
   Calendar, 
@@ -16,7 +17,8 @@ import {
   Target,
   Zap,
   ExternalLink,
-  UserPlus
+  UserPlus,
+  User
 } from "lucide-react";
 
 export default function ParticipantDashboard() {
@@ -232,6 +234,13 @@ export default function ParticipantDashboard() {
                 <p className="text-blue-200 text-sm">Active Events</p>
                 <p className="text-2xl font-bold">{events.length}</p>
               </div>
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-colors"
+              >
+                <User className="w-5 h-5" />
+                <span className="font-medium">Profile</span>
+              </Link>
             </div>
           </div>
         </div>
