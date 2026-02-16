@@ -28,6 +28,12 @@ export default function ParticipantDashboard({ userId, role }) {
   <CopyButton text={dashboardData.githubRepo} />
 </div>
 
+  <div className="flex items-center gap-2">
+  <span>{dashboardData.inviteCode}</span>
+  <CopyButton text={dashboardData.inviteCode} />
+</div>
+
+
 
   );
 }
