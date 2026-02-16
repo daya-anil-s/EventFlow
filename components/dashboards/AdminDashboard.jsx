@@ -53,17 +53,23 @@ export default function AdminDashboard({ userId, role }) {
       <div className="dashboard-grid">
         <DashboardWidget title="User Management">
           <div className="widget-stats">
-            <p><strong>Total Users:</strong> <span>[Placeholder]</span></p>
-            <p><strong>Active Sessions:</strong> <span>[Placeholder]</span></p>
-            <p><strong>New Registrations:</strong> <span>[Placeholder]</span></p>
+            <p><strong>Total Users:</strong> <span>{stats.totalUsers}</span>
+</p>
+            <p><strong>Active Sessions:</strong> <span>{stats.totalUsers}</span>
+</p>
+            <p><strong>New Registrations:</strong><span>{stats.totalUsers}</span>
+</p>
           </div>
         </DashboardWidget>
 
         <DashboardWidget title="Event Statistics">
           <div className="widget-stats">
-            <p><strong>Total Events:</strong> <span>[Placeholder]</span></p>
-            <p><strong>Upcoming Events:</strong> <span>[Placeholder]</span></p>
-            <p><strong>Completed Events:</strong> <span>[Placeholder]</span></p>
+            <p><strong>Total Events:</strong><span>{stats.totalUsers}</span>
+</p>
+            <p><strong>Upcoming Events:</strong> <span>{stats.totalUsers}</span>
+</p>
+            <p><strong>Completed Events:</strong> <span>{stats.totalUsers}</span>
+</p>
           </div>
         </DashboardWidget>
 
@@ -71,7 +77,8 @@ export default function AdminDashboard({ userId, role }) {
           <div className="widget-stats">
             <p><strong>Server Status:</strong> <span className="status-ok">Online</span></p>
             <p><strong>Database:</strong> <span className="status-ok">Connected</span></p>
-            <p><strong>Last Backup:</strong> <span>[Placeholder]</span></p>
+            <p><strong>Last Backup:</strong> <span>{stats.totalUsers}</span>
+</p>
           </div>
         </DashboardWidget>
 
