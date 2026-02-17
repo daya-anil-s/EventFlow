@@ -2,9 +2,11 @@
 import { Input, Label, FormField } from "@/components/ui/form";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { User, Mail, Calendar, Award, Users, Clock, Edit2, Save, X, Shield } from "lucide-react";
 
 export default function ProfilePage() {
+  const { data: session, status } = useSession();
   const [user, setUser] = useState(null);
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,15 +15,16 @@ export default function ProfilePage() {
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setEditForm({ name: parsedUser.name || "", bio: parsedUser.bio || "" });
+    if (status === "authenticated") {
+      // Set initial user from session
+      setUser(session.user);
+      setEditForm({ name: session.user?.name || "", bio: "" });
+      // Fetch full profile from API
+      fetchUserData();
+    } else if (status !== "loading") {
+      setLoading(false);
     }
-    // Always fetch user data from API - the middleware will provide the user ID via cookies
-    fetchUserData();
-  }, []);
+  }, [status]);
 
   const fetchUserData = async () => {
     try {
@@ -29,13 +32,11 @@ export default function ProfilePage() {
       const profileRes = await fetch("/api/auth/profile", {
         credentials: 'include'
       });
-      
+
       if (profileRes.ok) {
         const profileData = await profileRes.json();
         setUser(profileData.user);
         setEditForm({ name: profileData.user.name || "", bio: profileData.user.bio || "" });
-        // Store user in localStorage for future visits
-        localStorage.setItem("user", JSON.stringify(profileData.user));
       } else {
         console.error('Failed to fetch profile:', profileRes.status);
       }
@@ -44,7 +45,7 @@ export default function ProfilePage() {
       const teamRes = await fetch("/api/teams", {
         credentials: 'include'
       });
-      
+
       if (teamRes.ok) {
         const teamData = await teamRes.json();
         if (teamData.teams && teamData.teams.length > 0) {
@@ -75,8 +76,6 @@ export default function ProfilePage() {
         setUser(data.user);
         setIsEditing(false);
         showNotification("Profile updated successfully!", "success");
-        // Update localStorage
-        localStorage.setItem("user", JSON.stringify(data.user));
       } else {
         showNotification("Failed to update profile", "error");
       }
@@ -124,11 +123,10 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-slate-50">
       {/* Notification Toast */}
       {notification && (
-        <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
-          notification.type === "success" 
-            ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
+        <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 ${notification.type === "success"
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
             : "bg-red-50 text-red-700 border border-red-200"
-        }`}>
+          }`}>
           {notification.type === "success" ? <Save className="w-5 h-5" /> : <X className="w-5 h-5" />}
           {notification.message}
         </div>
@@ -180,7 +178,7 @@ export default function ProfilePage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="p-6">
                 {/* Avatar */}
                 <div className="flex items-center gap-6 mb-8">
@@ -191,15 +189,15 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     {isEditing ? (
-                     <FormField>
-  <Label>Full Name</Label>
-                        <Input 
-                          type="text" 
+                      <FormField>
+                        <Label>Full Name</Label>
+                        <Input
+                          type="text"
                           value={editForm.name}
                           onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                           placeholder="Enter your full name"
                         />
-</FormField>
+                      </FormField>
 
                     ) : (
                       <h2 className="text-2xl font-bold text-slate-900">{user?.name || "Unknown"}</h2>
@@ -271,7 +269,7 @@ export default function ProfilePage() {
                 <Users className="w-5 h-5 text-blue-600" />
                 Your Team
               </h3>
-              
+
               {team ? (
                 <div className="space-y-4">
                   <div className="p-4 bg-slate-50 rounded-lg">
@@ -314,7 +312,7 @@ export default function ProfilePage() {
                 <Award className="w-5 h-5 text-amber-600" />
                 Activity
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Events Joined</span>
