@@ -64,9 +64,9 @@ export default function LoginPage() {
                 border: "1px solid rgba(255, 255, 255, 0.1)"
             }}>
                 <div style={{ textAlign: "center", marginBottom: "32px" }}>
-                    <h2 style={{ 
-                        fontSize: "32px", 
-                        fontWeight: "700", 
+                    <h2 style={{
+                        fontSize: "32px",
+                        fontWeight: "700",
                         color: "#ffffff",
                         marginBottom: "8px"
                     }}>
@@ -78,60 +78,33 @@ export default function LoginPage() {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: "20px" }}>
-                        <label style={{ 
-                            display: "block", 
-                            fontSize: "12px", 
-                            fontWeight: "600", 
-                            color: "rgba(255, 255, 255, 0.8)",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            marginBottom: "8px"
-                        }}>
-                            Email
-                        </label>
-                        <FormField>
+                    <FormField>
                         <Label>Email</Label>
-                        <Input 
-                            type="email" 
+                        <Input
+                            type="email"
                             name="email"
-                            placeholder="Email" 
+                            placeholder="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </FormField>
 
-                    </div>
-
-                    <div style={{ marginBottom: "24px" }}>
-                        <label style={{ 
-                            display: "block", 
-                            fontSize: "12px", 
-                            fontWeight: "600", 
-                            color: "rgba(255, 255, 255, 0.8)",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            marginBottom: "8px"
-                        }}>
-                            Password
-                        </label>
-                        <FormField>
+                    <FormField>
                         <Label>Password</Label>
-                        <Input 
-                            type="password" 
+                        <Input
+                            type="password"
+                            placeholder="Password "
                             name="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </FormField>
 
-                    </div>
-
                     {error && (
-                        <div style={{ 
-                            padding: "12px", 
+                        <div style={{
+                            padding: "12px",
                             borderRadius: "8px",
-                            background: "rgba(239, 68, 68, 0.15)", 
+                            background: "rgba(239, 68, 68, 0.15)",
                             border: "1px solid rgba(239, 68, 68, 0.3)",
                             color: "#fca5a5",
                             fontSize: "13px",
@@ -162,17 +135,17 @@ export default function LoginPage() {
                     </button>
                 </form>
 
-                <div style={{ 
-                    marginTop: "24px", 
-                    textAlign: "center", 
+                <div style={{
+                    marginTop: "24px",
+                    textAlign: "center",
                     fontSize: "14px",
                     color: "rgba(255, 255, 255, 0.6)"
                 }}>
                     Don't have an account?{' '}
-                    <a 
-                        href="/register" 
-                        style={{ 
-                            color: "#60a5fa", 
+                    <a
+                        href="/register"
+                        style={{
+                            color: "#60a5fa",
                             fontWeight: "600",
                             textDecoration: "none"
                         }}
