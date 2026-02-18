@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db-connect";
 import Team from "@/models/Team";
 import User from "@/models/User";
+import Event from "@/models/Event";
+import mongoose from "mongoose";
 
 // GET all teams
 export async function GET(request) {
@@ -9,7 +11,7 @@ export async function GET(request) {
     await dbConnect();
     const { searchParams } = new URL(request.url);
     let userId = searchParams.get('userId');
-    
+
     // If no userId in query params, try to get from cookie
     if (!userId) {
       const cookieHeader = request.headers.get("cookie");
@@ -26,7 +28,7 @@ export async function GET(request) {
         }
       }
     }
-    
+
     let query = {};
     if (userId) {
       // Find teams where user is leader or member
@@ -37,13 +39,13 @@ export async function GET(request) {
         ]
       };
     }
-    
+
     const teams = await Team.find(query)
       .populate('leader', 'name email')
       .populate('members', 'name email')
       .populate('event', 'title startDate endDate')
       .sort({ createdAt: -1 });
-    
+
     return NextResponse.json({ teams });
   } catch (error) {
     console.error("Error fetching teams:", error);
@@ -56,26 +58,50 @@ export async function POST(request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const { name, eventId, leaderId, inviteCode } = body;
-    
+    let { name, eventId, leaderId, inviteCode } = body;
+
+    // If no eventId is provided, find the latest active event
+    if (!eventId) {
+      const latestEvent = await mongoose.models.Event.findOne({
+        endDate: { $gte: new Date() }
+      }).sort({ startDate: 1 });
+
+      if (latestEvent) {
+        eventId = latestEvent._id;
+      } else {
+        // Fallback to any event if no active ones
+        const anyEvent = await mongoose.models.Event.findOne().sort({ createdAt: -1 });
+        if (anyEvent) eventId = anyEvent._id;
+      }
+    }
+
+    if (!eventId) {
+      return NextResponse.json(
+        { error: "No active event found to join" },
+        { status: 400 }
+      );
+    }
+
     // Check if user already has a team
+    // Check if user already has a team FOR THIS SPECIFIC EVENT
     const existingTeam = await Team.findOne({
+      event: eventId,
       $or: [
         { leader: leaderId },
         { members: leaderId }
       ]
     });
-    
+
     if (existingTeam) {
       return NextResponse.json(
-        { error: "You are already in a team" },
+        { error: "You are already in a team for this event" },
         { status: 400 }
       );
     }
-    
+
     // Generate unique invite code
     const generatedInviteCode = inviteCode || Math.random().toString(36).substring(2, 10).toUpperCase();
-    
+
     const team = await Team.create({
       name,
       event: eventId,
@@ -83,10 +109,10 @@ export async function POST(request) {
       members: [],
       inviteCode: generatedInviteCode
     });
-    
+
     await team.populate('leader', 'name email');
     await team.populate('event', 'title startDate endDate');
-    
+
     return NextResponse.json({ team });
   } catch (error) {
     console.error("Error creating team:", error);

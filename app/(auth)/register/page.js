@@ -150,6 +150,7 @@ export default function RegisterPage() {
                             style={inputStyle}
                         >
                             <option value="participant" style={{ color: "#1f2937" }}>Participant</option>
+                            <option value="organizer" style={{ color: "#1f2937" }}>Organizer</option>
                             <option value="mentor" style={{ color: "#1f2937" }}>Mentor</option>
                             <option value="judge" style={{ color: "#1f2937" }}>Judge</option>
                             <option value="admin" style={{ color: "#1f2937" }}>Admin</option>
