@@ -47,6 +47,13 @@ export async function GET(request) {
 
 // CREATE a new team
 export async function POST(request) {
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const { isRateLimited } = limiter.check(5, ip); // 5 requests per minute per IP
+
+  if (isRateLimited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     await dbConnect();
     const body = await request.json();
@@ -95,8 +102,8 @@ export async function POST(request) {
     const generatedInviteCode = inviteCode || Math.random().toString(36).substring(2, 10).toUpperCase();
 
     const team = await Team.create({
-      name: name.trim(),
-      description: description?.trim() || "",
+      name: name,
+      description: description || "",
       event: eventId,
       leader: leaderId,
       members: [leaderId],
@@ -133,3 +140,4 @@ export async function POST(request) {
     return NextResponse.json({ error: "Failed to create team" }, { status: 500 });
   }
 }
+

@@ -1,26 +1,8 @@
-'use client';
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import JudgeDashboardClient from "./JudgeDashboardClient";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import {
-  Users,
-  Calendar,
-  Clock,
-  Trophy,
-  FileText,
-  Star,
-  CheckCircle,
-  AlertCircle,
-  ChevronRight,
-  Search,
-  Filter,
-  User,
-  MessageSquare,
-  BarChart3,
-  Eye,
-  Save
-} from "lucide-react";
+export const dynamic = 'force-dynamic';
 
 export default function JudgeDashboard() {
   const { data: session, status } = useSession();

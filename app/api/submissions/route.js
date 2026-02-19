@@ -3,10 +3,41 @@ import connectDB from "@/lib/db-connect";
 import Submission from "@/models/Submission";
 import Event from "@/models/Event";
 import Team from "@/models/Team";
+import { auth } from "@/auth";
+import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({
+    interval: 60 * 1000, // 1 minute
+});
+
+const submissionSchema = z.object({
+    event: z.string().min(1, "Event ID is required"),
+    team: z.string().min(1, "Team ID is required"),
+    title: z.string().min(1, "Title is required"),
+    description: z.string().min(1, "Description is required"),
+    repoLink: z.string().url("Invalid repository URL"),
+    demoLink: z.string().url("Invalid demo URL").optional().or(z.literal("")),
+});
 
 export async function POST(req) {
+    const ip = req.headers.get("x-forwarded-for") || "anonymous";
+    const { isRateLimited } = limiter.check(10, ip); // 10 requests per minute per IP
+
+    if (isRateLimited) {
+        return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     try {
         await connectDB();
+        const session = await auth();
+
+        if (!session || !session.user) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
 
         // Parse the request body
         const body = await req.json();
@@ -35,13 +66,15 @@ export async function POST(req) {
 
         // --- CREATE LOGIC ---
 
-        // Validate required fields
-        if (!event || !team || !title || !description || !repoLink) {
+        if (!validation.success) {
             return NextResponse.json(
-                { error: "Missing required fields: event, team, title, description, repoLink" },
+                { error: "Invalid input", details: validation.error.format() },
                 { status: 400 }
             );
         }
+
+        const { event, team, title, description, repoLink, demoLink } = validation.data;
+        const userId = session.user.id;
 
         // Check if event exists
         const eventExists = await Event.findById(event);
@@ -53,6 +86,14 @@ export async function POST(req) {
         const teamExists = await Team.findById(team);
         if (!teamExists) {
             return NextResponse.json({ error: "Invalid team ID" }, { status: 404 });
+        }
+
+        // Check if user is a member of the team
+        if (teamExists.leader.toString() !== userId && !teamExists.members.some(m => m.toString() === userId)) {
+            return NextResponse.json(
+                { error: "You are not a member of this team" },
+                { status: 403 }
+            );
         }
 
         // Check for duplicate submission (One per team per event)
@@ -87,6 +128,8 @@ export async function POST(req) {
         );
     }
 }
+
+
 
 export async function GET(req) {
     try {

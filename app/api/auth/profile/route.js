@@ -38,6 +38,13 @@ export async function GET() {
 
 // UPDATE user profile
 export async function PUT(request) {
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const { isRateLimited } = limiter.check(10, ip); // 10 requests per minute per IP
+
+  if (isRateLimited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     const session = await auth();
 
@@ -49,11 +56,25 @@ export async function PUT(request) {
 
     const userId = session.user.id;
     const body = await request.json();
-    const { name, bio, avatar } = body;
+    const validation = profileSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: validation.error.format() },
+        { status: 400 }
+      );
+    }
+    
+    const { name, bio, avatar } = validation.data;
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (bio !== undefined) updateData.bio = bio;
+    if (avatar !== undefined) updateData.avatar = avatar;
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { name, bio, avatar },
+      updateData,
       { new: true }
     ).select("-password").lean();
 
@@ -71,3 +92,4 @@ export async function PUT(request) {
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
   }
 }
+

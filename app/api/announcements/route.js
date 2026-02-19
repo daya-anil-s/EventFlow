@@ -34,13 +34,21 @@ export async function POST(req) {
 
     const session = await auth();
 
-    if (!session)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer"))
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const body = await req.json();
+    const validation = announcementSchema.safeParse(body);
 
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: validation.error.format() },
+        { status: 400 }
+      );
+    }
+    
     const announcement = await Announcement.create({
-      ...body,
+      ...validation.data,
       createdBy: session.user.id,
     });
 
@@ -53,10 +61,16 @@ export async function POST(req) {
   }
 }
 
+
 /* DELETE — deactivate announcement */
 export async function DELETE(req) {
   try {
     await connectDB();
+
+    const session = await auth();
+
+    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer"))
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const { id } = await req.json();
 
