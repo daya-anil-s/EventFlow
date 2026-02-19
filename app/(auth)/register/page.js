@@ -1,18 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import Aurora from "@/components/common/Aurora";
+import Navbar from "@/components/common/Navbar";
 import { validateRegister } from "@/utils/validateRegister";
 
 
 
-
-const [errors, setErrors] = useState({});
-const [status, setStatus] = useState({
-  error: "",
-  success: "",
-  loading: false,
-});
 
 const styles = {
   page: {
@@ -105,6 +102,8 @@ export default function RegisterPage() {
     success: "",
     loading: false,
   });
+  const [errors, setErrors] = useState({});
+
 
  const handleChange = (e) => {
   const { name, value } = e.target;
@@ -198,72 +197,40 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-
-            <input
+          <form onSubmit={handleSubmit}>
+            <InputField
+              label="Full Name"
               type="text"
               name="name"
-              placeholder="Full Name"
               value={formData.name}
               onChange={handleChange}
               disabled={status.loading}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/40 transition"
+              placeholder="Enter your name"
+              error={errors.name}
             />
 
-            <input
+            <InputField
+              label="Email"
               type="email"
               name="email"
-              placeholder="Email"
               value={formData.email}
               onChange={handleChange}
               disabled={status.loading}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/40 transition"
+              placeholder="Enter your email"
             />
 
-            <input
+            <InputField
+              label="Password"
               type="password"
               name="password"
-              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
               disabled={status.loading}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/40 transition"
+              placeholder="Create a password"
+              error={errors.password}
             />
 
-        <form onSubmit={handleSubmit}>
-          <InputField
-            label="Full Name"
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            disabled={status.loading}
-            placeholder="Enter your name"
-            error={errors.name}
-          />
-
-          <InputField
-            label="Email"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            disabled={status.loading}
-            placeholder="Enter your email"
-          />
-
-          <InputField
-            label="Password"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            disabled={status.loading}
-            placeholder="Create a password"
-            error={errors.password}
-          />
-
-          <div style={{ marginBottom: "24px" }}>
+            <div style={{ marginBottom: "24px" }}>
             <label style={styles.label}>I am a</label>
             <select
               name="role"
@@ -298,6 +265,7 @@ export default function RegisterPage() {
               {status.loading ? "Creating Account..." : "Sign Up"}
               {!status.loading && <ArrowRight className="w-4 h-4" />}
             </button>
+            </div>
 
             <div className="mt-6 text-center text-sm text-slate-500 font-mono">
               Already have an account?{" "}
