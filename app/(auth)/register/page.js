@@ -176,6 +176,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             disabled={status.loading}
             placeholder="Enter your name"
+            error={errors.name}
           />
 
           <InputField
@@ -196,6 +197,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             disabled={status.loading}
             placeholder="Create a password"
+            error={errors.password}
           />
 
           <div style={{ marginBottom: "24px" }}>
@@ -269,5 +271,6 @@ export default function RegisterPage() {
     </div>
   );
 }
+
 
 
