@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db-connect";
 import Submission from "@/models/Submission";
