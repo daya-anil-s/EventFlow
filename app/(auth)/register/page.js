@@ -6,9 +6,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/common/Navbar";
 import Aurora from "@/components/common/Aurora";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
-
-
+import { getPasswordStrength } from "@/utils/passwordStrength";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -66,6 +64,9 @@ export default function RegisterPage() {
       });
     }
   };
+  const passwordStrength = getPasswordStrength(formData.password);
+
+  
 
   return (
     <main className="bg-space-900 relative min-h-screen">
@@ -152,6 +153,48 @@ export default function RegisterPage() {
                 />
               </div>
 
+                    {formData.password && (
+  <div style={{ marginTop: "8px" }}>
+    <div
+      style={{
+        height: "6px",
+        borderRadius: "4px",
+        background: "#1f2937",
+        overflow: "hidden",
+        transition: "width 0.3s ease-in-out",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: `${(passwordStrength.score / 4) * 100}%`,
+          transition: "0.3s ease",
+          background:
+            passwordStrength.label === "Weak"
+              ? "#ef4444"
+              : passwordStrength.label === "Medium"
+              ? "#f59e0b"
+              : "#22c55e",
+        }}
+      />
+    </div>
+    <p
+      style={{
+        fontSize: "12px",
+        marginTop: "4px",
+        color:
+          passwordStrength.label === "Weak"
+            ? "#f87171"
+            : passwordStrength.label === "Medium"
+            ? "#fbbf24"
+            : "#4ade80",
+      }}
+    >
+      Strength: {passwordStrength.label}
+    </p>
+  </div>
+)}
+
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
                   I am a
@@ -216,6 +259,7 @@ export default function RegisterPage() {
     </main>
   );
 }
+
 
 
 
