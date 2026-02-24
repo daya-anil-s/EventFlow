@@ -1,48 +1,87 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Calendar, Users, Trophy, ArrowRight, Star, MapPin, Search, FilterX } from "lucide-react";
+import { Calendar, Users, Trophy, ArrowRight, Star, MapPin, Search, FilterX, Twitter, Linkedin, Facebook, MessageCircle, Link2, Check } from "lucide-react";
 import Navbar from "@/components/common/Navbar";
 import Aurora from "@/components/common/Aurora";
 
-const events = [
-    {
-        id: "1",
-        title: "Global AI Hackathon",
-        date: "Feb 15, 2026",
-        location: "Virtual",
-        category: "AI/ML",
-        participants: "500+",
-        status: "Upcoming",
-        description: "Build the future of AI with cutting-edge challenges",
-    },
-    {
-        id: "2",
-        title: "Web3 Builders Summit",
-        date: "Mar 10, 2026",
-        location: "San Francisco, CA",
-        category: "Web3",
-        participants: "200+",
-        status: "Registration Open",
-        description: "Shape the decentralized future of the internet",
-    },
-    {
-        id: "3",
-        title: "Green Tech Challenge",
-        date: "Apr 5, 2026",
-        location: "London, UK",
-        category: "Sustainability",
-        participants: "350+",
-        status: "Coming Soon",
-        description: "Innovate sustainable solutions for a better planet",
-    },
-];
-
 export default function EventsPage() {
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [category, setCategory] = useState("");
     const [location, setLocation] = useState("");
+    const [copiedId, setCopiedId] = useState(null);
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const response = await fetch('/api/events');
+                const data = await response.json();
+                
+                if (data.events && Array.isArray(data.events)) {
+                    // Transform API data to match display format
+                    const transformedEvents = data.events.map(event => ({
+                        id: event._id,
+                        title: event.title,
+                        date: new Date(event.startDate).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                        }),
+                        location: event.location || "Virtual",
+                        category: event.tracks && event.tracks.length > 0 ? event.tracks[0] : "General",
+                        participants: event.participants?.toString() || "TBD",
+                        status: event.status === "ongoing" ? "Registration Open" : 
+                                event.status === "upcoming" ? "Upcoming" : 
+                                event.status === "completed" ? "Completed" : "Draft",
+                        description: event.description,
+                        startDate: event.startDate,
+                        endDate: event.endDate,
+                        registrationDeadline: event.registrationDeadline
+                    }));
+                    setEvents(transformedEvents);
+                }
+            } catch (err) {
+                console.error("Error fetching events:", err);
+                setError("Failed to load events");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEvents();
+    }, []);
+
+    const handleCopyLink = (eventId) => {
+        const url = `${window.location.origin}/events/${eventId}`;
+        navigator.clipboard.writeText(url);
+        setCopiedId(eventId);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const handleShareTwitter = (event) => {
+        const text = encodeURIComponent(`Check out this event: ${event.title}`);
+        const url = encodeURIComponent(`${window.location.origin}/events/${event.id}`);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
+    };
+
+    const handleShareLinkedIn = (event) => {
+        const url = encodeURIComponent(`${window.location.origin}/events/${event.id}`);
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, "_blank");
+    };
+
+    const handleShareWhatsApp = (event) => {
+        const text = encodeURIComponent(`Check out this event: ${event.title} - ${window.location.origin}/events/${event.id}`);
+        window.open(`https://wa.me/?text=${text}`, "_blank");
+    };
+
+    const handleShareFacebook = (event) => {
+        const url = encodeURIComponent(`${window.location.origin}/events/${event.id}`);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+    };
 
     const clearFilters = () => {
         setSearchTerm("");
@@ -154,7 +193,17 @@ export default function EventsPage() {
             {/* Events Grid Section */}
             <section className="relative z-10 pb-24 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    {filteredEvents.length > 0 ? (
+                    {loading ? (
+                        <div className="text-center py-20">
+                            <div className="inline-block w-12 h-12 border-4 border-neon-cyan/30 border-t-neon-cyan rounded-full animate-spin mb-4"></div>
+                            <p className="text-slate-400">Loading events...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-20 glass-card rounded-2xl border-glow">
+                            <h3 className="text-2xl font-semibold text-white mb-2">Unable to load events</h3>
+                            <p className="text-slate-400">{error}</p>
+                        </div>
+                    ) : filteredEvents.length > 0 ? (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredEvents.map((event, index) => (
                                 <div
@@ -168,7 +217,9 @@ export default function EventsPage() {
                                                 ? "bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30"
                                                 : event.status === "Upcoming"
                                                     ? "bg-neon-violet/20 text-neon-violet border border-neon-violet/30"
-                                                    : "bg-slate-700/50 text-slate-400 border border-slate-600/30"
+                                                    : event.status === "Completed"
+                                                        ? "bg-slate-700/50 text-slate-400 border border-slate-600/30"
+                                                        : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                                             }`}>
                                             {event.status}
                                         </span>
@@ -205,14 +256,53 @@ export default function EventsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Action Button */}
-                                    <Link
-                                        href={`/events/${event.id}`}
-                                        className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 bg-white/5 text-white rounded-xl font-semibold hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20 group-hover:border-neon-cyan/30"
-                                    >
-                                        View Event
-                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </Link>
+                                    {/* Action Button & Share Icons */}
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/5">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleCopyLink(event.id); }}
+                                                className={`p-2 rounded-lg border transition-all duration-300 ${copiedId === event.id ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' : 'border-white/10 hover:border-white/30 text-slate-400 hover:text-white'}`}
+                                                title="Copy link"
+                                            >
+                                                {copiedId === event.id ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleShareTwitter(event); }}
+                                                className="p-2 rounded-lg border border-white/10 hover:border-sky-500/50 hover:bg-sky-500/10 text-slate-400 hover:text-sky-400 transition-all duration-300"
+                                                title="Share on Twitter"
+                                            >
+                                                <Twitter className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleShareLinkedIn(event); }}
+                                                className="p-2 rounded-lg border border-white/10 hover:border-blue-600/50 hover:bg-blue-600/10 text-slate-400 hover:text-blue-500 transition-all duration-300"
+                                                title="Share on LinkedIn"
+                                            >
+                                                <Linkedin className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleShareWhatsApp(event); }}
+                                                className="p-2 rounded-lg border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-500 transition-all duration-300"
+                                                title="Share on WhatsApp"
+                                            >
+                                                <MessageCircle className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleShareFacebook(event); }}
+                                                className="p-2 rounded-lg border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/10 text-slate-400 hover:text-blue-500 transition-all duration-300"
+                                                title="Share on Facebook"
+                                            >
+                                                <Facebook className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                        <Link
+                                            href={`/events/${event.id}`}
+                                            className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 bg-white/5 text-white rounded-xl font-semibold hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20 group-hover:border-neon-cyan/30"
+                                        >
+                                            View Event
+                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </Link>
+                                    </div>
                                 </div>
                             ))}
                         </div>

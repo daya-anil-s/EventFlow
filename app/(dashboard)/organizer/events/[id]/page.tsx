@@ -165,6 +165,11 @@ export default function EventDashboard() {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
+                                id={`event-tab-${tab}`}
+                                role="tab"
+                                aria-selected={activeTab === tab}
+                                aria-controls={`event-tabpanel-${tab}`}
+                                tabIndex={activeTab === tab ? 0 : -1}
                                 className={`pb-4 text-sm font-medium border-b-2 transition-colors capitalize ${activeTab === tab
                                     ? "border-indigo-600 text-indigo-600"
                                     : "border-transparent text-slate-500 hover:text-slate-700"
@@ -179,7 +184,12 @@ export default function EventDashboard() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {activeTab === "overview" && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div
+                        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                        role="tabpanel"
+                        id="event-tabpanel-overview"
+                        aria-labelledby="event-tab-overview"
+                    >
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-6">
 
@@ -288,7 +298,12 @@ export default function EventDashboard() {
                 )}
 
                 {activeTab === "judges" && (
-                    <div className="space-y-6">
+                    <div
+                        className="space-y-6"
+                        role="tabpanel"
+                        id="event-tabpanel-judges"
+                        aria-labelledby="event-tab-judges"
+                    >
                         <div className="flex justify-between items-center">
                             <h2 className="text-xl font-bold text-slate-900">Assigned Judges</h2>
                             <button
@@ -333,7 +348,12 @@ export default function EventDashboard() {
                 )}
 
                 {activeTab === "teams" && (
-                    <div className="space-y-6">
+                    <div
+                        className="space-y-6"
+                        role="tabpanel"
+                        id="event-tabpanel-teams"
+                        aria-labelledby="event-tab-teams"
+                    >
                         <div className="flex justify-between items-center">
                             <h2 className="text-xl font-bold text-slate-900">Participating Teams</h2>
                         </div>
