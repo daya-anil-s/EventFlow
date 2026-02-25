@@ -119,6 +119,7 @@ export default function RegisterPage() {
             role="form"
             aria-label="Registration form"
           >
+<<<<<<< HEAD
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
@@ -151,6 +152,43 @@ export default function RegisterPage() {
                   placeholder="Enter your email"
                 />
               </div>
+=======
+            <FormField>
+              <Label>Email</Label>
+              <Input
+                ref={emailInputRef}
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+               onChange={(e) => {
+  setPassword(e.target.value);
+  if (error) setError(""); // ✅ clear error when user types
+}}
+                autoComplete="email"
+                required
+                aria-describedby={error ? "login-error" : undefined}
+              />
+            </FormField>
+
+            <FormField>
+              <Label>Password</Label>
+              <Input
+                ref={passwordInputRef}
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError(""); // ✅ clear error when user types
+                }}
+                autoComplete="current-password"
+                required
+                aria-describedby={error ? "login-error" : undefined}
+              />
+            </FormField>
+>>>>>>> dea1473 (Clear auth error when user updates input fields)
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
