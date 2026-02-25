@@ -58,7 +58,7 @@ export async function GET() {
 // UPDATE user profile
 export async function PUT(request) {
   const ip = request.headers.get("x-forwarded-for") || "anonymous";
-  const { isRateLimited } = limiter.check(10, ip);
+  const { isRateLimited } = await limiter.check(10, ip);
 
   if (isRateLimited) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
