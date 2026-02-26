@@ -91,6 +91,12 @@ const statusColors = {
   draft: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
 };
 
+const defaultScoringWeights = {
+  innovation: 40,
+  technicalDepth: 30,
+  impact: 30,
+};
+
 export default function AdminDashboardClient({ user }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
@@ -135,6 +141,7 @@ export default function AdminDashboardClient({ user }) {
     startDate: "",
     endDate: "",
     status: "draft",
+    scoringWeights: defaultScoringWeights,
     modules: {
       judging: true,
       certificates: true,
@@ -284,8 +291,22 @@ export default function AdminDashboardClient({ user }) {
     }));
   };
 
+  const handleScoringWeightChange = (field, value) => {
+    setEventFormData((prev) => ({
+      ...prev,
+      scoringWeights: {
+        ...prev.scoringWeights,
+        [field]: Number(value),
+      },
+    }));
+  };
+
   const handleEventSubmit = async (e) => {
     e.preventDefault();
+    if (!isScoringWeightValid) {
+      alert("Scoring weights must total 100%.");
+      return;
+    }
     try {
       const url = editingEvent
         ? `/api/events/${editingEvent._id}`
@@ -311,6 +332,7 @@ export default function AdminDashboardClient({ user }) {
           startDate: "",
           endDate: "",
           status: "draft",
+          scoringWeights: defaultScoringWeights,
           modules: {
             judging: true,
             certificates: true,
@@ -335,6 +357,7 @@ export default function AdminDashboardClient({ user }) {
       startDate: event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : "",
       endDate: event.endDate ? new Date(event.endDate).toISOString().split('T')[0] : "",
       status: event.status,
+      scoringWeights: event.scoringWeights || defaultScoringWeights,
       modules: event.modules || {
         judging: true,
         certificates: true,
@@ -542,82 +565,93 @@ export default function AdminDashboardClient({ user }) {
     </div>
   );
 
-  const ChartCard = ({ title, subtitle, children }) => (
-    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 space-y-4">
-      <div>
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-        {subtitle && <p className="text-slate-400 text-sm mt-1">{subtitle}</p>}
-      </div>
-      {children}
-    </div>
-  );
-
-  const BarChart = ({ data, height = 160 }) => {
-    const maxValue = Math.max(1, ...data.map((item) => item.value));
-    return (
-      <div className="space-y-4">
-        <div className="flex items-end gap-3" style={{ height }}>
-          {data.map((item) => {
-            const barHeight = Math.round((item.value / maxValue) * 100);
-            return (
-              <div key={item.label} className="flex-1 flex flex-col items-center gap-2">
-                <div className="text-xs text-slate-400">{formatNumber(item.value)}</div>
-                <div className="w-full bg-slate-700/50 rounded-lg overflow-hidden flex items-end" style={{ height: height - 40 }}>
-                  <div
-                    className={`${item.color || "bg-indigo-500"} w-full transition-all duration-300`}
-                    style={{ height: `${barHeight}%` }}
-                  />
-                </div>
-                <div className="text-xs text-slate-400 text-center">{item.label}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const LineChart = ({ data }) => {
-    const width = 320;
-    const height = 120;
-    const padding = 16;
-    const maxValue = Math.max(1, ...data.map((item) => item.value));
-    const step = data.length > 1 ? (width - padding * 2) / (data.length - 1) : 0;
-    const points = data
-      .map((item, index) => {
-        const x = padding + step * index;
-        const y = height - padding - (item.value / maxValue) * (height - padding * 2);
-        return `${x},${y}`;
-      })
-      .join(" ");
-
-    return (
-      <div className="space-y-4">
-        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
-          <polyline
-            fill="none"
-            stroke="rgb(99 102 241)"
-            strokeWidth="2"
-            points={points}
-          />
-          {data.map((item, index) => {
-            const x = padding + step * index;
-            const y = height - padding - (item.value / maxValue) * (height - padding * 2);
-            return <circle key={item.label} cx={x} cy={y} r="3" fill="rgb(99 102 241)" />;
-          })}
-        </svg>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-slate-400">
-          {data.map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-              <span>{item.label}</span>
-              <span className="ml-auto text-slate-500">{formatNumber(item.value)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
+const formatNumber = (value) => {                                                       
+    514 +    if (!Number.isFinite(value)) return "0";                                              
+    515 +    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;                  
+    516 +    if (value >= 1_000) return `${(value / 1_000).toFixed(1)}k`;                          
+    517 +    return `${value}`;                                                                    
+    518 +  };                                                                                      
+    519 +                                                                                          
+    520 +  const ChartCard = ({ title, subtitle, children }) => (                                  
+    521 +    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl
+          p-6 space-y-4">                                                                          
+    522 +      <div>                                                                               
+    523 +        <h3 className="text-lg font-semibold text-white">{title}</h3>                     
+    524 +        {subtitle && <p className="text-slate-400 text-sm mt-1">{subtitle}</p>}           
+    525 +      </div>                                                                              
+    526 +      {children}                                                                          
+    527 +    </div>                                                                                
+    528 +  );                                                                                      
+    529 +                                                                                          
+    530 +  const BarChart = ({ data, height = 160 }) => {                                          
+    531 +    const maxValue = Math.max(1, ...data.map((item) => item.value));                      
+    532 +    return (                                                                              
+    533 +      <div className="space-y-4">                                                         
+    534 +        <div className="flex items-end gap-3" style={{ height }}>                         
+    535 +          {data.map((item) => {                                                           
+    536 +            const barHeight = Math.round((item.value / maxValue) * 100);                  
+    537 +            return (                                                                      
+    538 +              <div key={item.label} className="flex-1 flex flex-col items-center gap-2">  
+    539 +                <div className="text-xs text-slate-400">{formatNumber(item.value)}</div>  
+    540 +                <div className="w-full bg-slate-700/50 rounded-lg overflow-hidden flex ite
+         ms-end" style={{ height: height - 40 }}>                                                  
+    541 +                  <div                                                                    
+    542 +                    className={`${item.color || "bg-indigo-500"} w-full transition-all dur
+         ation-300`}                                                                               
+    543 +                    style={{ height: `${barHeight}%` }}                                   
+    544 +                  />                                                                      
+    545 +                </div>                                                                    
+    546 +                <div className="text-xs text-slate-400 text-center">{item.label}</div>    
+    547 +              </div>                                                                      
+    548 +            );                                                                            
+    549 +          })}                                                                             
+    550 +        </div>                                                                            
+    551 +      </div>                                                                              
+    552 +    );                                                                                    
+    553 +  };                                                                                      
+    554 +                                                                                          
+    555 +  const LineChart = ({ data }) => {                                                       
+    556 +    const width = 320;                                                                    
+    557 +    const height = 120;                                                                   
+    558 +    const padding = 16;                                                                   
+    559 +    const maxValue = Math.max(1, ...data.map((item) => item.value));                      
+    560 +    const step = data.length > 1 ? (width - padding * 2) / (data.length - 1) : 0;         
+    561 +    const points = data                                                                   
+    562 +      .map((item, index) => {                                                             
+    563 +        const x = padding + step * index;                                                 
+    564 +        const y = height - padding - (item.value / maxValue) * (height - padding * 2);    
+    565 +        return `${x},${y}`;                                                               
+    566 +      })                                                                                  
+    567 +      .join(" ");                                                                         
+    568 +                                                                                          
+    569 +    return (                                                                              
+    570 +      <div className="space-y-4">                                                         
+    571 +        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>             
+    572 +          <polyline                                                                       
+    573 +            fill="none"                                                                   
+    574 +            stroke="rgb(99 102 241)"                                                      
+    575 +            strokeWidth="2"                                                               
+    576 +            points={points}                                                               
+    577 +          />                                                                              
+    578 +          {data.map((item, index) => {                                                    
+    579 +            const x = padding + step * index;                                             
+    580 +            const y = height - padding - (item.value / maxValue) * (height - padding * 2);
+    581 +            return <circle key={item.label} cx={x} cy={y} r="3" fill="rgb(99 102 241)" />;
+    582 +          })}                                                                             
+    583 +        </svg>                                                                            
+    584 +        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-slate-400">    
+    585 +          {data.map((item) => (                                                           
+    586 +            <div key={item.label} className="flex items-center gap-2">                    
+    587 +              <span className="w-2 h-2 rounded-full bg-indigo-500"></span>                
+    588 +              <span>{item.label}</span>                                                   
+    589 +              <span className="ml-auto text-slate-500">{formatNumber(item.value)}</span>  
+    590 +            </div>                                                                        
+    591 +          ))}                                                                             
+    592 +        </div>                                                                            
+    593 +      </div>                                                                              
+    594 +    );                                                                                    
+    595 +  };                                                                                      
+    596 +               
 
   const roleDistributionColors = {
     admin: "bg-red-500",
@@ -1047,6 +1081,7 @@ export default function AdminDashboardClient({ user }) {
                   startDate: "",
                   endDate: "",
                   status: "draft",
+                  scoringWeights: defaultScoringWeights,
                   modules: {
                     judging: true,
                     certificates: true,
@@ -1129,6 +1164,37 @@ export default function AdminDashboardClient({ user }) {
                   ></textarea>
                 </div>
 
+                <div className="mb-6">
+                  <h4 className="text-md font-semibold mb-3 text-slate-300 border-b border-slate-700/50 pb-2">
+                    Scoring Weights
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { key: "innovation", label: "Innovation" },
+                      { key: "technicalDepth", label: "Technical Depth" },
+                      { key: "impact", label: "Impact" },
+                    ].map((weight) => (
+                      <div key={weight.key}>
+                        <label className="block text-sm font-medium mb-2 text-slate-300">
+                          {weight.label} (%)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={eventFormData.scoringWeights?.[weight.key] ?? defaultScoringWeights[weight.key]}
+                          onChange={(e) => handleScoringWeightChange(weight.key, e.target.value)}
+                          className="w-full bg-slate-900/50 border border-slate-600/50 rounded-lg p-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          required
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className={`mt-3 text-sm ${isScoringWeightValid ? "text-slate-400" : "text-red-400"}`}>
+                    Total: {scoringWeightTotal}% {isScoringWeightValid ? "" : "(must equal 100%)"}
+                  </p>
+                </div>
+
                 {/* Module Toggles */}
                 <div className="mb-6">
                   <h4 className="text-md font-semibold mb-3 text-slate-300 border-b border-slate-700/50 pb-2">
@@ -1162,7 +1228,12 @@ export default function AdminDashboardClient({ user }) {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                    disabled={!isScoringWeightValid}
+                    className={`px-5 py-2.5 text-white rounded-lg transition-colors ${
+                      isScoringWeightValid
+                        ? "bg-indigo-600 hover:bg-indigo-700"
+                        : "bg-slate-600 cursor-not-allowed"
+                    }`}
                   >
                     {editingEvent ? "Update Event" : "Create Event"}
                   </button>
