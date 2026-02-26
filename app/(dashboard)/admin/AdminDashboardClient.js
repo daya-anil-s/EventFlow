@@ -595,82 +595,80 @@ export default function AdminDashboardClient({ user }) {
     </div>
   );
 
-  const ChartCard = ({ title, subtitle, children }) => (
-    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 space-y-4">
-      <div>
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-        {subtitle && <p className="text-slate-400 text-sm mt-1">{subtitle}</p>}
-      </div>
-      {children}
-    </div>
-  );
-
-  const BarChart = ({ data, height = 160 }) => {
-    const maxValue = Math.max(1, ...data.map((item) => item.value));
-    return (
-      <div className="space-y-4">
-        <div className="flex items-end gap-3" style={{ height }}>
-          {data.map((item) => {
-            const barHeight = Math.round((item.value / maxValue) * 100);
-            return (
-              <div key={item.label} className="flex-1 flex flex-col items-center gap-2">
-                <div className="text-xs text-slate-400">{formatNumber(item.value)}</div>
-                <div className="w-full bg-slate-700/50 rounded-lg overflow-hidden flex items-end" style={{ height: height - 40 }}>
-                  <div
-                    className={`${item.color || "bg-indigo-500"} w-full transition-all duration-300`}
-                    style={{ height: `${barHeight}%` }}
-                  />
-                </div>
-                <div className="text-xs text-slate-400 text-center">{item.label}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+ const ChartCard = ({ title, subtitle, children }) => (                                           
+    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6     
+  space-y-4">                                                                                      
+      <div>                                                                                        
+        <h3 className="text-lg font-semibold text-white">{title}</h3>                              
+        {subtitle && <p className="text-slate-400 text-sm mt-1">{subtitle}</p>}                    
+      </div>                                                                                       
+      {children}                                                                                   
+    </div>                                                                                         
+  );                                                                                               
+                                                                                                   
+  const BarChart = ({ data, height = 160 }) => {                                                   
+    const maxValue = Math.max(1, ...data.map((item) => item.value));                               
+    return (                                                                                       
+      <div className="space-y-4">                                                                  
+        <div className="flex items-end gap-3" style={{ height }}>                                  
+          {data.map((item) => {                                                                    
+            const barHeight = Math.round((item.value / maxValue) * 100);                           
+            return (                                                                               
+              <div key={item.label} className="flex-1 flex flex-col items-center gap-2">           
+                <div className="text-xs text-slate-400">{formatNumber(item.value)}</div>           
+                <div className="w-full bg-slate-700/50 rounded-lg overflow-hidden flex items-end"  
+  style={{ height: height - 40 }}>                                                                 
+                  <div                                                                             
+                    className={`${item.color || "bg-indigo-500"} w-full transition-all duration-   
+  300`}                                                                                            
+                    style={{ height: `${barHeight}%` }}                                            
+                  />                                                                               
+                </div>                                                                             
+                <div className="text-xs text-slate-400 text-center">{item.label}</div>             
+              </div>                                                                               
+            );                                                                                     
+          })}                                                                                      
+        </div>                                                                                     
+      </div>                                                                                       
+    );                                                                                             
+  };                                                                                               
+                                                                                                   
+  const LineChart = ({ data }) => {                                                                
+    const width = 320;                                                                             
+    const height = 120;                                                                            
+    const padding = 16;                                                                            
+    const maxValue = Math.max(1, ...data.map((item) => item.value));                               
+    const step = data.length > 1 ? (width - padding * 2) / (data.length - 1) : 0;                  
+    const points = data                                                                            
+      .map((item, index) => {                                                                      
+        const x = padding + step * index;                                                          
+        const y = height - padding - (item.value / maxValue) * (height - padding * 2);             
+        return `${x},${y}`;                                                                        
+      })                                                                                           
+      .join(" ");                                                                                  
+                                                                                                   
+    return (                                                                                       
+      <div className="space-y-4">                                                                  
+        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>                      
+          <polyline fill="none" stroke="rgb(99 102 241)" strokeWidth="2" points={points} />        
+          {data.map((item, index) => {                                                             
+            const x = padding + step * index;                                                      
+            const y = height - padding - (item.value / maxValue) * (height - padding * 2);         
+            return <circle key={item.label} cx={x} cy={y} r="3" fill="rgb(99 102 241)" />;         
+          })}                                                                                      
+        </svg>                                                                                     
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-slate-400">             
+          {data.map((item) => (                                                                    
+            <div key={item.label} className="flex items-center gap-2">                             
+              <span className="w-2 h-2 rounded-full bg-indigo-500"></span>                         
+              <span>{item.label}</span>                                                            
+              <span className="ml-auto text-slate-500">{formatNumber(item.value)}</span>           
+            </div>                                                                                 
+          ))}                                                                                      
+        </div>                                                                                     
+      </div>                                                                                       
     );
-  };
-
-  const LineChart = ({ data }) => {
-    const width = 320;
-    const height = 120;
-    const padding = 16;
-    const maxValue = Math.max(1, ...data.map((item) => item.value));
-    const step = data.length > 1 ? (width - padding * 2) / (data.length - 1) : 0;
-    const points = data
-      .map((item, index) => {
-        const x = padding + step * index;
-        const y = height - padding - (item.value / maxValue) * (height - padding * 2);
-        return `${x},${y}`;
-      })
-      .join(" ");
-
-    return (
-      <div className="space-y-4">
-        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
-          <polyline
-            fill="none"
-            stroke="rgb(99 102 241)"
-            strokeWidth="2"
-            points={points}
-          />
-          {data.map((item, index) => {
-            const x = padding + step * index;
-            const y = height - padding - (item.value / maxValue) * (height - padding * 2);
-            return <circle key={item.label} cx={x} cy={y} r="3" fill="rgb(99 102 241)" />;
-          })}
-        </svg>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-slate-400">
-          {data.map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-              <span>{item.label}</span>
-              <span className="ml-auto text-slate-500">{formatNumber(item.value)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  };             
 
   const roleDistributionColors = {
     admin: "bg-red-500",
