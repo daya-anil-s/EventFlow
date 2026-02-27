@@ -114,6 +114,7 @@ export default function LoginPage() {
                   type="email"
                   name="email"
                   required
+                  autoFocus
                   value={formData.email}
                   onChange={handleChange}
                   disabled={status.loading}
