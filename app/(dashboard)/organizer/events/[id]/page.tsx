@@ -114,6 +114,16 @@ export default function EventDashboard() {
         }
     };
 
+    const handleCopyTeamCode = async (teamId: string, code: string) => {
+        try {
+            await navigator.clipboard.writeText(code);
+            setCopiedTeamId(teamId);
+            setTimeout(() => setCopiedTeamId(null), 2000);
+        } catch (err) {
+            console.error("Failed to copy team code:", err);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -406,7 +416,16 @@ export default function EventDashboard() {
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-slate-900 line-clamp-1">{team.name}</h4>
-                                                <p className="text-sm text-slate-500">Code: <span className="font-mono">{team.inviteCode}</span></p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm text-slate-500">Code: <span className="font-mono">{team.inviteCode}</span></p>
+                                                    <button
+                                                        onClick={() => handleCopyTeamCode(team._id, team.inviteCode)}
+                                                        className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors"
+                                                        title="Copy Code"
+                                                    >
+                                                        {copiedTeamId === team._id ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
