@@ -91,7 +91,10 @@ EventFlow addresses these challenges by providing a reusable, modular event infr
 
 ## 🖼️ Screenshots
 
- Note: The UI has been updated to a modern **Dark Sci-Fi Theme** with Aurora backgrounds.
+Note: The UI has been updated to a modern **Dark Sci-Fi Theme** with Aurora backgrounds.
+
+> Note: Screenshots may not reflect the latest UI during active development.
+
 <img width="1500" alt="EventFlow Sci-Fi UI" src="https://github.com/user-attachments/assets/184cae65-9946-498c-bc8d-36e975db0193" />
 <!-- TODO: Update with new Sci-Fi Theme Screenshot -->
 
