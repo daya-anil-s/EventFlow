@@ -231,6 +231,13 @@ Utility functions, database connection logic, and shared helpers
 ---
 
 ## 🤝 Contributing
+## Getting Started as a Contributor
+
+If you’re new to EventFlow, the steps below can help you get started smoothly.
+
+- Check the list of open issues in the repository
+- Start with issues labeled `documentation` or `good first issue`
+- Ask to be assigned to an issue before starting work to avoid duplication
 
 1. Browse issues
 2. Get assigned by maintainer
